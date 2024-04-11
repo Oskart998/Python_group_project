@@ -4,11 +4,12 @@ import tkinter as tk
 from tkinter import PhotoImage
 from breezypythongui import EasyFrame
 from tkinter import font
-from TicTacToe import TicTacToe
+from TicTacToe import TicTacToe  # Import the TicTacToe class from TicTacToe.py
 
 class GameBoard(EasyFrame):
     def __init__(self, title="Tic Tac Toe"):
         super().__init__(title=title)
+        # Initialize player names and game state
         self.player1Name = self.getUserNames(1).ljust(8)
         self.player2Name = self.getUserNames(2).ljust(8)
         self.currentPlayer = self.player1Name
@@ -18,37 +19,34 @@ class GameBoard(EasyFrame):
         self.avatar1Image = None
         self.avatar2Image = None
         self.users_file_path = "users.csv"
-        purpleHex = "#8916a6"
-        
-        self.firstPlayerImg = self.addLabel(text="", row=1, column=1, sticky="NSEW"
-                                            ,background=purpleHex)
+        purpleHex = "#8916a6"  # Define color hex code
+
+        # Set up player avatar labels
+        self.firstPlayerImg = self.addLabel(text="", row=1, column=1, sticky="NSEW",
+                                            background=purpleHex)
         self.secondPlayerImg = self.addLabel(text="", row=1, column=3, sticky="NSEW",
                                              background=purpleHex)
 
-
+        # Set up avatar selection and game layout
         self.selectAvatar()
-        
-        
         self.setBackground(purpleHex)
         self.setSize(550, 700)
         self.setResizable(False)
         consoleFont = font.Font(family="Lucida Console", size=8, font=font.BOLD)
 
+        # Display player names and win counts
         self.addLabel(text=f"Player 1: {self.player1Name}", row=0, column=0, sticky="NSEW", columnspan=2,
                       background=purpleHex,  font= consoleFont)
         self.addLabel(text=f"Player 2: {self.player2Name}", row=0, column=3, sticky="NSEW", columnspan=2,
                       background=purpleHex, font= consoleFont)
-       
-
         self.player1WinsLabel = self.addLabel(text=f"Wins: {self.player1wins}", row=2, column=0, sticky="NSEW",
                       background=purpleHex, font=consoleFont, columnspan=2)
-        
         self.player2WinsLabel = self.addLabel(text=f"Wins: {self.player2wins}", row=2, column=3, sticky="NSEW",
                       background=purpleHex, font=consoleFont, columnspan=2)
-
         self.turnLabel = self.addLabel(text=f"Current player: {self.currentPlayer}", row=3, column=2,
                                        background=purpleHex, sticky="NSEW", font= consoleFont)
 
+        # Set up game control buttons
         self.controlPanel = self.addPanel(background="#4b494d", row=4, column=0, columnspan=4,
                                           rowspan=3)
         self.controlPanel.buttons = []
@@ -60,6 +58,7 @@ class GameBoard(EasyFrame):
         
         self.images = []
 
+        # Load images for game buttons
         for i in range(len(self.controlPanel.buttons)):
                 self.images.append(PhotoImage(width=100, height=100))
                 self.controlPanel.buttons[i]["image"] = self.images[i]
@@ -67,27 +66,32 @@ class GameBoard(EasyFrame):
         self.image1 = PhotoImage(file="xx.gif")
         self.image2 = PhotoImage(file="o.gif")
 
-
+    # Get user names
     def getUserNames(self, playerNum):
         return self.prompterBox(title="Player Info", promptString=f"Enter Player {playerNum} name")
         
+    # Select avatar for each player
     def selectAvatar(self):
         self.closedCount = 0
         self.avatars = []
 
+        # Load avatar images
         for i in range(1, 5):
                 image = PhotoImage(file=f"av{i}.gif", width=100, height=100)
                 self.avatars.append([image, f"av{i}.gif"])
 
+        # Hide main window and show avatar selection windows
         self.master.withdraw()
         self.createWindows()
 
+    # Create avatar selection windows
     def createWindows(self):
         avatar1 = self.get_user_avatar(self.player1Name)
         avatar2 = self.get_user_avatar(self.player2Name)
         coordinates = [(0,0), (0, 1), (1, 0), (1, 1)]
         consoleFont = font.Font(family="Lucida Console", size=8, font=font.BOLD)
 
+        # If avatar not selected for player 1, show avatar selection window
         if avatar1 == None:
             self.frameAvatar1 = tk.Toplevel()
             self.avatar1Btns = []
@@ -108,6 +112,7 @@ class GameBoard(EasyFrame):
              self.firstImage = PhotoImage(file=avatar1)
              self.firstPlayerImg["image"] = self.firstImage
 
+        # If avatar not selected for player 2, show avatar selection window
         if avatar2 == None:
             self.frameAvatar2 = tk.Toplevel()  
             self.avatar2Btns = []                                                                                                                   
@@ -119,12 +124,8 @@ class GameBoard(EasyFrame):
                 self.avatar2Btns.append(tk.Button(self.frameAvatar2, text="", command=lambda i=i: self.hideWind(self.avatar2Btns[i], 2, i),
                                                 image=self.avatars[i][0]))
 
-                # Keep a reference to the image to prevent it from being garbage collected
-                
                 self.avatar2Btns[i].image = self.avatars[i]
 
-                #self.avatar1Btns[i].pack()
-                #self.avatar2Btns[i].pack()
                 self.avatar2Btns[i].grid(row= coordinates[i][0]+1, column = coordinates[i][1])
               
         else:
@@ -133,6 +134,7 @@ class GameBoard(EasyFrame):
             self.secondImage = PhotoImage(file=avatar2)
             self.secondPlayerImg["image"] = self.secondImage
 
+    # Hide avatar selection window after selection
     def hideWind(self, btn,windNum, index):
         if windNum == 1:
             self.write_csv([self.player1Name, self.avatars[index][1], 0])
@@ -150,16 +152,17 @@ class GameBoard(EasyFrame):
             self.frameAvatar2.destroy()
             self.closedCount += 1
 
-
+        # If both avatar selection windows are closed, show main window
         if self.closedCount == 2:
             self.master.deiconify()
            
-
+    # Write user avatar selection to CSV file
     def write_csv(self, data):
         with open(self.users_file_path, 'a', newline='') as csvfile:
             csvWriter = csv.writer(csvfile)
             csvWriter.writerow(data) 
 
+    # Get user avatar from CSV file
     def get_user_avatar(self, playerName):
         with open(self.users_file_path, 'r') as csvfile:
             csvreader = csv.reader(csvfile)
@@ -169,9 +172,9 @@ class GameBoard(EasyFrame):
                     return row[1]  # Return the value of the second column
         return None  # Return None if the target string is not found
 
-
+    # Update user wins in CSV file
     def update_wins(self, winner):
-    # Temporary file to store updated rows
+        # Temporary file to store updated rows
         temp_file_path = self.users_file_path + '.tmp'
 
         # Open the CSV file for reading and writing
@@ -192,9 +195,7 @@ class GameBoard(EasyFrame):
         # Replace the original file with the temporary file
         os.replace(temp_file_path, self.users_file_path)
         
-
-
-
+    # Make a move in the game
     def makeMove(self, btn, row, col):
         if self.game.make_move(row, col):
             if self.currentPlayer == self.player1Name:
@@ -214,14 +215,13 @@ class GameBoard(EasyFrame):
                     self.player2wins += 1
                 self.showWinner(winner)
 
-
+    # Reset the game board
     def resetGameBoard(self):
-
         for i in range(len(self.controlPanel.buttons)):
                 self.images.append(PhotoImage(width=100, height=100))
                 self.controlPanel.buttons[i]["image"] = self.images[i]
                 
-    
+    # Show winner of the game
     def showWinner(self, winner):
         if winner == 'Draw':
             tk.messagebox.showinfo("Game Over", "It's a draw!")
@@ -242,8 +242,6 @@ class GameBoard(EasyFrame):
         self.game.reset()
         self.turnLabel.config(text=f"Current player: {self.player1Name}")
         self.currentPlayer = self.player1Name
-
-
 
 def main():
     GameBoard().mainloop()

@@ -1,7 +1,11 @@
+import random
+
 class TicTacToe:
-    def __init__(self):
+    def __init__(self, against_computer=False):
         # Initialize the game by resetting the board
         self.reset()
+        # Set whether playing against the computer or not
+        self.against_computer = against_computer
 
     def reset(self):
         # Reset the board to an empty state
@@ -16,10 +20,21 @@ class TicTacToe:
             self.board[row][col] = self.current_player
             # Switch to the other player for the next turn
             self.current_player = 'O' if self.current_player == 'X' else 'X'
+            # If playing against the computer, make the computer's move
+            if self.against_computer and self.current_player == 'O':
+                self.make_computer_move()
             # Move successful
             return True
         # Move not possible, cell already occupied
         return False
+
+    def make_computer_move(self):
+    # Make a random move for the computer
+        empty_cells = [(row, col) for row in range(3) for col in range(3) if self.board[row][col] == ' ']
+        if empty_cells:
+            return random.choice(empty_cells)
+        else:
+            return None
 
     def check_winner(self):
         # Check rows for a win
